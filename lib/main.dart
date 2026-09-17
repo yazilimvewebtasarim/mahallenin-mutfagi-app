@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'core/theme/theme.dart';
+import 'theme/app_theme.dart';
+import 'features/auth/views/splash_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,16 +13,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Sandbox App',
+      title: 'Mahallenin Mutfağı',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Mahallenin Mutfağı'),
-        ),
-        body: const Center(
-          child: Text('Hoşgeldiniz!'),
-        ),
-      ),
+      home: const SplashView(),
     );
   }
 }
