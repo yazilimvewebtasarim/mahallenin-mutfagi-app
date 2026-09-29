@@ -4,6 +4,7 @@ import '../../../data/services/order_service.dart';
 import '../../../data/services/payment_service.dart';
 import 'cart_controller.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/error_utils.dart';
 
 class CheckoutController extends GetxController {
   final OrderService _orderService = OrderService();
@@ -55,7 +56,8 @@ class CheckoutController extends GetxController {
         Get.snackbar('Başarılı', 'Siparişiniz alındı. (Kredi kartı simüle edildi)');
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Sipariş oluşturulamadı: $e');
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Sipariş oluşturulamadı.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }

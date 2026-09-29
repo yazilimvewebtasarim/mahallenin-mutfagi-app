@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../data/services/chef_service.dart';
 
 class ChefFinanceController extends GetxController {
@@ -28,7 +29,8 @@ class ChefFinanceController extends GetxController {
         withdrawals.assignAll(List<Map<String, dynamic>>.from(rawList));
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Finans bilgileri yüklenemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Finans bilgileri yüklenemedi.');
+      Get.snackbar('Bilgi', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
@@ -57,7 +59,8 @@ class ChefFinanceController extends GetxController {
       }
       return false;
     } catch (e) {
-      Get.snackbar('Hata', 'IBAN güncellenemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'IBAN güncellenemedi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -108,7 +111,8 @@ class ChefFinanceController extends GetxController {
       }
       return false;
     } catch (e) {
-      Get.snackbar('Hata', 'Talep oluşturulamadı: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Talep oluşturulamadı.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
       return false;
     } finally {
       isActionLoading.value = false;

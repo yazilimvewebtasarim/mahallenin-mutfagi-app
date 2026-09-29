@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/services/session_service.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../data/models/custom_request_model.dart';
 import '../../../data/services/customer_service.dart';
 
@@ -9,6 +11,8 @@ class CustomerCustomRequestsController extends GetxController {
 
   final requests = <CustomRequestModel>[].obs;
   final isLoading = false.obs;
+  final isGuest = false.obs;
+  final errorMessage = ''.obs;
   final isAcceptingBid = false.obs;
 
   @override
@@ -20,10 +24,22 @@ class CustomerCustomRequestsController extends GetxController {
   Future<void> fetchRequests() async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
+
+      final hasAuth = await SessionService.hasSession();
+      if (!hasAuth) {
+        isGuest.value = true;
+        requests.clear();
+        return;
+      }
+      isGuest.value = false;
+
       final result = await _customerService.getCustomerRequests();
       requests.value = result;
     } catch (e) {
-      Get.snackbar('Hata', 'Talepleriniz yüklenemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Talepleriniz yüklenemedi.');
+      errorMessage.value = friendly;
+      Get.snackbar('Bilgi', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
@@ -51,7 +67,8 @@ class CustomerCustomRequestsController extends GetxController {
 
       await fetchRequests();
     } catch (e) {
-      Get.snackbar('Hata', 'Teklif kabul edilemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Teklif kabul edilemedi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isAcceptingBid.value = false;
     }

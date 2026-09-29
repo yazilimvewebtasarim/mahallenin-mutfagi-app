@@ -26,54 +26,61 @@ class SettingsView extends StatelessWidget {
         future: SessionService.load(),
         builder: (context, snapshot) {
           final session = snapshot.data ?? {};
+          final token = session['token'];
+          final bool isLoggedIn = token != null && token.isNotEmpty;
           final name = session['name'] ?? 'Kullanıcı';
           final role = session['role'] ?? 'customer';
 
           return ListView(
             children: [
-              _ProfileCard(name: name, role: role),
+              if (isLoggedIn)
+                _ProfileCard(name: name, role: role)
+              else
+                const _GuestHeaderCard(),
               const SizedBox(height: 16),
 
-              // ── Hesabım ──
-              _SectionHeader('Hesabım'),
-              _Tile(icon: Icons.person_outline, iconColor: const Color(0xFFEA004B), title: 'Profil Bilgilerimi Düzenle',
-                  onTap: () => _showEditProfileSheet(context, name)),
-              _Divider(),
-              _Tile(icon: Icons.lock_outline, iconColor: const Color(0xFFEA004B), title: 'Şifremi Değiştir',
-                  onTap: () => _showChangePasswordSheet(context)),
+              // ── Hesabım (Yalnızca Giriş Yapmış Kullanıcılar) ──
+              if (isLoggedIn) ...[
+                _SectionHeader('Hesabım'),
+                _Tile(icon: Icons.person_outline, iconColor: const Color(0xFFEA004B), title: 'Profil Bilgilerimi Düzenle',
+                    onTap: () => _showEditProfileSheet(context, name)),
+                _Divider(),
+                _Tile(icon: Icons.lock_outline, iconColor: const Color(0xFFEA004B), title: 'Şifremi Değiştir',
+                    onTap: () => _showChangePasswordSheet(context)),
 
-              if (role == 'customer') ...[
-                _Divider(),
-                _Tile(icon: Icons.location_on_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Adreslerim', subtitle: 'Kayıtlı teslimat adreslerim',
-                    onTap: () => Get.to(() => const AddressesView())),
-                _Divider(),
-                _Tile(icon: Icons.favorite_border, iconColor: const Color(0xFFEA004B),
-                    title: 'Favorilerim', onTap: () => Get.to(() => const FavoritesView())),
-                _Divider(),
-                _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.customerOrders)),
-                _Divider(),
-                _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Özel Yemek Taleplerim', onTap: () => Get.toNamed(AppRoutes.customerCustomRequests)),
+                if (role == 'customer') ...[
+                  _Divider(),
+                  _Tile(icon: Icons.location_on_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Adreslerim', subtitle: 'Kayıtlı teslimat adreslerim',
+                      onTap: () => Get.to(() => const AddressesView())),
+                  _Divider(),
+                  _Tile(icon: Icons.favorite_border, iconColor: const Color(0xFFEA004B),
+                      title: 'Favorilerim', onTap: () => Get.to(() => const FavoritesView())),
+                  _Divider(),
+                  _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.customerOrders)),
+                  _Divider(),
+                  _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Özel Yemek Taleplerim', onTap: () => Get.toNamed(AppRoutes.customerCustomRequests)),
+                ],
+
+                if (role == 'chef') ...[
+                  _Divider(),
+                  _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.chefOrders)),
+                  _Divider(),
+                  _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Özel Yemek Talepleri', onTap: () => Get.toNamed(AppRoutes.chefRequests)),
+                  _Divider(),
+                  _Tile(icon: Icons.account_balance_outlined, iconColor: const Color(0xFFEA004B),
+                      title: 'Finans & Kazanç', onTap: () => Get.toNamed(AppRoutes.chefFinance)),
+                  _Divider(),
+                  _Tile(icon: Icons.star_border, iconColor: const Color(0xFFEA004B),
+                      title: 'Değerlendirmelerim', onTap: () => Get.toNamed(AppRoutes.chefReviews)),
+                ],
+
+                const SizedBox(height: 16),
               ],
-
-              if (role == 'chef') ...[
-                _Divider(),
-                _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.chefOrders)),
-                _Divider(),
-                _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Özel Yemek Talepleri', onTap: () => Get.toNamed(AppRoutes.chefRequests)),
-                _Divider(),
-                _Tile(icon: Icons.account_balance_outlined, iconColor: const Color(0xFFEA004B),
-                    title: 'Finans & Kazanç', onTap: () => Get.toNamed(AppRoutes.chefFinance)),
-                _Divider(),
-                _Tile(icon: Icons.star_border, iconColor: const Color(0xFFEA004B),
-                    title: 'Değerlendirmelerim', onTap: () => Get.toNamed(AppRoutes.chefReviews)),
-              ],
-
-              const SizedBox(height: 16),
 
               // ── Bildirimler ──
               _SectionHeader('Bildirimler'),
@@ -117,28 +124,30 @@ class SettingsView extends StatelessWidget {
               _Tile(icon: Icons.verified_outlined, iconColor: Colors.grey.shade600, title: 'Uygulama Versiyonu',
                   trailing: const Text('1.0.0', style: TextStyle(color: Colors.grey, fontSize: 14)), onTap: null),
 
-              const SizedBox(height: 24),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: OutlinedButton.icon(
-                  onPressed: () => _confirmLogout(context),
-                  icon: const Icon(Icons.logout, color: Color(0xFFEA004B)),
-                  label: const Text('Oturumu Kapat', style: TextStyle(color: Color(0xFFEA004B))),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    side: const BorderSide(color: Color(0xFFEA004B)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              if (isLoggedIn) ...[
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: OutlinedButton.icon(
+                    onPressed: () => _confirmLogout(context),
+                    icon: const Icon(Icons.logout, color: Color(0xFFEA004B)),
+                    label: const Text('Oturumu Kapat', style: TextStyle(color: Color(0xFFEA004B))),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                      side: const BorderSide(color: Color(0xFFEA004B)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: () => _confirmDeleteAccount(context),
-                  child: const Text('Hesabımı Sil', style: TextStyle(color: Colors.red, fontSize: 13)),
+                const SizedBox(height: 8),
+                Center(
+                  child: TextButton(
+                    onPressed: () => _confirmDeleteAccount(context),
+                    child: const Text('Hesabımı Sil', style: TextStyle(color: Colors.red, fontSize: 13)),
+                  ),
                 ),
-              ),
+              ],
+
               const SizedBox(height: 40),
             ],
           );
@@ -337,6 +346,88 @@ class _ProfileCard extends StatelessWidget {
           ),
         ])),
       ]),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// MISAFIR KULLANICI KARTI (Giriş Yapılmamışsa)
+// ─────────────────────────────────────────────
+class _GuestHeaderCard extends StatelessWidget {
+  const _GuestHeaderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: const Color(0xFFEA004B).withValues(alpha: 0.12),
+                child: const Icon(Icons.person_outline, size: 30, color: Color(0xFFEA004B)),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hoş Geldiniz 👋',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Misafir Kullanıcı',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Siparişlerinizi takip etmek, özel yemek talebi oluşturmak ve favori aşçılarınızı kaydetmek için lütfen giriş yapın.',
+            style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.login, arguments: 'customer'),
+                  icon: const Icon(Icons.login, size: 18),
+                  label: const Text('Giriş Yap'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEA004B),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Get.toNamed(AppRoutes.login, arguments: {'role': 'customer', 'isRegister': true}),
+                  icon: const Icon(Icons.person_add_outlined, size: 18, color: Color(0xFFEA004B)),
+                  label: const Text('Üye Ol', style: TextStyle(color: Color(0xFFEA004B))),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFEA004B)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

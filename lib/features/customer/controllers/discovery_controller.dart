@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../data/models/chef_model.dart';
 import '../../../data/services/customer_service.dart';
 
@@ -24,7 +25,7 @@ class DiscoveryController extends GetxController {
       allChefs.value = chefs;
       _applyFilter();
     } catch (e) {
-      errorMessage.value = 'Hata: $e';
+      errorMessage.value = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Aşçılar yüklenirken bir sorun oluştu.');
     } finally {
       isLoading.value = false;
     }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../data/models/order_model.dart';
 import '../../../data/services/order_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/utils/error_utils.dart';
 
 class ChefOrdersController extends GetxController {
   final OrderService _orderService = OrderService();
@@ -71,7 +72,8 @@ class ChefOrdersController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Siparişler yüklenemedi: $e');
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Siparişler yüklenemedi.');
+      Get.snackbar('Bilgi', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
@@ -84,9 +86,10 @@ class ChefOrdersController extends GetxController {
       if (index != -1) {
         orders[index] = updatedOrder;
       }
-      Get.snackbar('Başarılı', 'Sipariş durumu güncellendi: $status');
+      Get.snackbar('Başarılı', 'Sipariş durumu güncellendi.', snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
-      Get.snackbar('Hata', 'Durum güncellenemedi: $e');
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Durum güncellenemedi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
     }
   }
 }

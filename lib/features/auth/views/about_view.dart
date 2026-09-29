@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/services/api_client.dart';
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
+
+  Future<Map<String, dynamic>> _fetchPlatformStats() async {
+    try {
+      final response = await ApiClient.dio.get(ApiConstants.platformStatsEndpoint);
+      if (response.data is Map<String, dynamic> && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+    } catch (_) {}
+    return {};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +95,7 @@ class AboutView extends StatelessWidget {
                 child: const _TextBlock(
                   'Ev aşçılarının yeteneklerini ekonomik bir değere dönüştürmek; '
                   'aynı zamanda müşterilerin sağlıklı, taze ve ev yapımı yemeklere kolayca ulaşmasını sağlamak.\n\n'
-                  'Platformumuz sayesinde ev hanımları ve ev beylerinden oluşan binlerce aşçı, '
+                  'Platformumuz sayesinde ev aşçıları, '
                   'mutfaklarını küçük bir işletmeye dönüştürerek kendi gelirlerini kazanmaktadır.',
                 ),
               ),
@@ -104,14 +116,28 @@ class AboutView extends StatelessWidget {
                 title: 'Platformumuz',
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      _StatCard(icon: Icons.restaurant, value: '500+', label: 'Aşçı'),
-                      const SizedBox(width: 12),
-                      _StatCard(icon: Icons.people_outline, value: '5.000+', label: 'Mutlu Müşteri'),
-                      const SizedBox(width: 12),
-                      _StatCard(icon: Icons.location_city_outlined, value: '12+', label: 'Şehir'),
-                    ],
+                  child: FutureBuilder<Map<String, dynamic>>(
+                    future: _fetchPlatformStats(),
+                    builder: (context, snapshot) {
+                      final data = snapshot.data ?? {};
+                      final chefs = data['totalChefs'];
+                      final customers = data['totalCustomers'];
+                      final cities = data['totalCities'];
+
+                      final chefText = (chefs != null && chefs > 0) ? '$chefs' : 'Aktif';
+                      final customerText = (customers != null && customers > 0) ? '$customers' : 'Büyüyen';
+                      final cityText = (cities != null && cities > 0) ? '$cities' : 'İstanbul';
+
+                      return Row(
+                        children: [
+                          _StatCard(icon: Icons.restaurant, value: chefText, label: 'Ev Aşçısı'),
+                          const SizedBox(width: 12),
+                          _StatCard(icon: Icons.people_outline, value: customerText, label: 'Mutlu Müşteri'),
+                          const SizedBox(width: 12),
+                          _StatCard(icon: Icons.location_city_outlined, value: cityText, label: 'Hizmet Şehri'),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

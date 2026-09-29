@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../../../data/models/order_model.dart';
 import '../../../data/services/order_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/session_service.dart';
+import '../../../core/utils/error_utils.dart';
 
 class CustomerOrdersController extends GetxController {
   final OrderService _orderService = OrderService();
@@ -10,6 +12,8 @@ class CustomerOrdersController extends GetxController {
   
   final orders = <OrderModel>[].obs;
   final isLoading = false.obs;
+  final isGuest = false.obs;
+  final errorMessage = ''.obs;
   Timer? _pollingTimer;
   final Map<String, String> _lastKnownStatuses = {};
 
@@ -34,7 +38,11 @@ class CustomerOrdersController extends GetxController {
   }
 
   Future<void> _pollOrdersSilently() async {
+    if (isGuest.value) return;
     try {
+      final hasAuth = await SessionService.hasSession();
+      if (!hasAuth) return;
+
       final freshOrders = await _orderService.getCustomerOrders();
 
       for (final order in freshOrders) {
@@ -82,6 +90,16 @@ class CustomerOrdersController extends GetxController {
   Future<void> fetchOrders() async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
+
+      final hasAuth = await SessionService.hasSession();
+      if (!hasAuth) {
+        isGuest.value = true;
+        orders.clear();
+        return;
+      }
+      isGuest.value = false;
+
       final result = await _orderService.getCustomerOrders();
       orders.value = result;
       for (final order in result) {
@@ -90,7 +108,9 @@ class CustomerOrdersController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar('Hata', 'Siparişler yüklenemedi: $e');
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Siparişleriniz yüklenemedi.');
+      errorMessage.value = friendly;
+      Get.snackbar('Bilgi', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }

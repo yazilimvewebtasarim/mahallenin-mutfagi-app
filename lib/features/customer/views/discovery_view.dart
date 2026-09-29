@@ -3,9 +3,30 @@ import 'package:get/get.dart';
 import '../controllers/discovery_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/services/session_service.dart';
 
 class DiscoveryView extends StatelessWidget {
   const DiscoveryView({super.key});
+
+  Future<void> _handleAuthNavigation(String route, String featureName) async {
+    final hasSession = await SessionService.hasSession();
+    if (hasSession) {
+      Get.toNamed(route);
+    } else {
+      Get.defaultDialog(
+        title: 'Giriş Yapmalısınız',
+        middleText: '$featureName alanını görüntülemek için lütfen giriş yapın veya kayıt olun.',
+        textConfirm: 'Giriş Yap',
+        textCancel: 'Vazgeç',
+        confirmTextColor: Colors.white,
+        buttonColor: const Color(0xFFEA004B),
+        onConfirm: () {
+          Get.back();
+          Get.toNamed(AppRoutes.login, arguments: 'customer');
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +48,12 @@ class DiscoveryView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.receipt_long_outlined),
             tooltip: 'Siparişlerim',
-            onPressed: () => Get.toNamed(AppRoutes.customerOrders),
+            onPressed: () => _handleAuthNavigation(AppRoutes.customerOrders, 'Siparişlerim'),
           ),
           IconButton(
             icon: const Icon(Icons.request_quote_outlined),
             tooltip: 'Özel Taleplerim',
-            onPressed: () => Get.toNamed(AppRoutes.customerCustomRequests),
+            onPressed: () => _handleAuthNavigation(AppRoutes.customerCustomRequests, 'Özel Taleplerim'),
           ),
           Obx(() => IconButton(
             icon: Badge(
@@ -75,7 +96,47 @@ class DiscoveryView extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               if (controller.errorMessage.value.isNotEmpty) {
-                return Center(child: Text(controller.errorMessage.value));
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEA004B).withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.wifi_off_rounded, size: 48, color: Color(0xFFEA004B)),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Bağlantı Kurulamadı',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          controller.errorMessage.value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.4),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () => controller.fetchChefs(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Yeniden Dene'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEA004B),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               if (controller.filteredChefs.isEmpty) {
                 return const Center(child: Text('Aşçı bulunamadı.'));

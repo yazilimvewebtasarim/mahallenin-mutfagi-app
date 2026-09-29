@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../data/services/chef_service.dart';
 
 class ChefRequestsController extends GetxController {
@@ -21,7 +22,8 @@ class ChefRequestsController extends GetxController {
       final result = await _chefService.getCustomRequests();
       requests.value = result;
     } catch (e) {
-      Get.snackbar('Hata', 'Talepler yüklenemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Talepler yüklenemedi.');
+      Get.snackbar('Bilgi', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
@@ -44,7 +46,8 @@ class ChefRequestsController extends GetxController {
       }
       return false;
     } catch (e) {
-      Get.snackbar('Hata', 'Teklif iletilemedi: $e', snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Teklif iletilemedi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
       return false;
     } finally {
       isSubmittingBid.value = false;

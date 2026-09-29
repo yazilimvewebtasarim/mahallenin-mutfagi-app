@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/customer_custom_requests_controller.dart';
 import '../../../data/models/custom_request_model.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/routes/app_routes.dart';
 
 class CustomerCustomRequestsView extends StatelessWidget {
   const CustomerCustomRequestsView({super.key});
@@ -71,6 +72,84 @@ class CustomerCustomRequestsView extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoading.value && controller.requests.isEmpty) {
           return const Center(child: CircularProgressIndicator(color: AppTheme.yemeksepetiPink));
+        }
+
+        if (controller.isGuest.value) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEA004B).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.lock_outline, size: 56, color: Color(0xFFEA004B)),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Giriş Yapmalısınız',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Özel yemek taleplerinizi görüntülemek ve yeni talep oluşturmak için lütfen giriş yapın.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Get.toNamed(AppRoutes.login, arguments: 'customer'),
+                    icon: const Icon(Icons.login),
+                    label: const Text('Giriş Yap'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEA004B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (controller.errorMessage.value.isNotEmpty && controller.requests.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.wifi_off_rounded, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Talepler Yüklenemedi',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () => controller.fetchRequests(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Yeniden Dene'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
 
         if (controller.requests.isEmpty) {

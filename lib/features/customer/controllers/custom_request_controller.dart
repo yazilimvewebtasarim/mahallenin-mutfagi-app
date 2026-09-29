@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/error_utils.dart';
 import '../../../data/services/customer_service.dart';
 
 class CustomRequestController extends GetxController {
@@ -42,7 +43,8 @@ class CustomRequestController extends GetxController {
         backgroundColor: Colors.green, 
         colorText: Colors.white);
     } catch (e) {
-      Get.snackbar('Hata', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Talep oluşturulurken bir hata meydana geldi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isSubmitting.value = false;
     }

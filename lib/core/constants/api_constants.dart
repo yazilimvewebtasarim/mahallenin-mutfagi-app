@@ -23,5 +23,7 @@ class ApiConstants {
   static const String chefFinanceUpdateIban = '/chef/finance/update-iban';
   static const String chefFinanceWithdraw = '/chef/finance/withdraw';
   static const String customerShopierInit = '/payment/shopier/init';
+  static const String platformStatsEndpoint = '/platform/stats';
+  static const String authRefreshTokenEndpoint = '/auth/refresh-token';
 }
 
