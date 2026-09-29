@@ -24,6 +24,16 @@ class DiscoveryView extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.receipt_long_outlined),
+            tooltip: 'Siparişlerim',
+            onPressed: () => Get.toNamed(AppRoutes.customerOrders),
+          ),
+          IconButton(
+            icon: const Icon(Icons.request_quote_outlined),
+            tooltip: 'Özel Taleplerim',
+            onPressed: () => Get.toNamed(AppRoutes.customerCustomRequests),
+          ),
           Obx(() => IconButton(
             icon: Badge(
               label: Text('${cartController.totalItemCount}'),

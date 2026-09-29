@@ -4,6 +4,7 @@ import '../../core/services/api_client.dart';
 import '../models/food_model.dart';
 import '../models/cart_item_model.dart';
 import '../models/chef_model.dart';
+import '../models/custom_request_model.dart';
 
 class CustomerService {
   final Dio _dio;
@@ -42,6 +43,28 @@ class CustomerService {
       await _dio.post(ApiConstants.customerRequestsEndpoint, data: body);
     } catch (e) {
       throw Exception('Talep oluşturulamadı: $e');
+    }
+  }
+
+  Future<List<CustomRequestModel>> getCustomerRequests() async {
+    try {
+      final response = await _dio.get(ApiConstants.customerRequestsEndpoint);
+      final rawList = (response.data['data'] as List?) ?? [];
+      return rawList.map((item) => CustomRequestModel.fromJson(item)).toList();
+    } catch (e) {
+      throw Exception('Özel talepleriniz yüklenemedi: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> acceptBid(String requestId, String chefId) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.customerRequestsEndpoint}/$requestId/accept-bid',
+        data: {'chefId': chefId},
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception('Teklif kabul edilemedi: $e');
     }
   }
 

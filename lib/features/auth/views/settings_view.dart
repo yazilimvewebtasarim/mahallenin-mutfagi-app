@@ -53,12 +53,18 @@ class SettingsView extends StatelessWidget {
                 _Divider(),
                 _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
                     title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.customerOrders)),
+                _Divider(),
+                _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
+                    title: 'Özel Yemek Taleplerim', onTap: () => Get.toNamed(AppRoutes.customerCustomRequests)),
               ],
 
               if (role == 'chef') ...[
                 _Divider(),
                 _Tile(icon: Icons.receipt_long_outlined, iconColor: const Color(0xFFEA004B),
                     title: 'Siparişlerim', onTap: () => Get.toNamed(AppRoutes.chefOrders)),
+                _Divider(),
+                _Tile(icon: Icons.request_quote_outlined, iconColor: const Color(0xFFEA004B),
+                    title: 'Özel Yemek Talepleri', onTap: () => Get.toNamed(AppRoutes.chefRequests)),
                 _Divider(),
                 _Tile(icon: Icons.account_balance_outlined, iconColor: const Color(0xFFEA004B),
                     title: 'Finans & Kazanç', onTap: () => Get.toNamed(AppRoutes.chefFinance)),

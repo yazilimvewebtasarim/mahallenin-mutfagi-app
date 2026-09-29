@@ -19,4 +19,5 @@ abstract class AppRoutes {
   static const aiSuggestions = '/ai-suggestions';
   static const settings = '/settings';
   static const chefRequests = '/chef/requests';
+  static const customerCustomRequests = '/customer/custom-requests';
 }

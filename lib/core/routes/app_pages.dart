@@ -23,6 +23,7 @@ import '../../features/chef/controllers/chef_reviews_controller.dart';
 import '../../features/customer/views/chef_storefront_view.dart';
 import '../../features/auth/views/settings_view.dart';
 import '../../features/chef/views/chef_requests_view.dart';
+import '../../features/customer/views/customer_custom_requests_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -105,5 +106,6 @@ class AppPages {
     GetPage(name: AppRoutes.aiSuggestions, page: () => const AiSuggestionsView()),
     GetPage(name: AppRoutes.settings, page: () => const SettingsView()),
     GetPage(name: AppRoutes.chefRequests, page: () => const ChefRequestsView()),
+    GetPage(name: AppRoutes.customerCustomRequests, page: () => const CustomerCustomRequestsView()),
   ];
 }
