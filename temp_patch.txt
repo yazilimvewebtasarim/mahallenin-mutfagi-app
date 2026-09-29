@@ -1,0 +1,14 @@
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSubscriptionStatus() async {
+    return {
+      "orderCount": 0,
+      "paidOrderLimit": 10,
+    };
+  }
+
+  @override
+  Future<bool> notifyPayment() async {
+    return true;
+  }

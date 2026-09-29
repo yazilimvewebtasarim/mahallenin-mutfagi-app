@@ -38,6 +38,10 @@ dependencies:
   dio: ^5.11.1
   google_fonts: ^8.2.1
   flutter_secure_storage: ^11.2.0
+  flutter_local_notifications: ^22.3.1
+  audioplayers: ^6.8.1
+  shared_preferences: ^2.5.5
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +64,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/data/il_ilce_mahalle.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

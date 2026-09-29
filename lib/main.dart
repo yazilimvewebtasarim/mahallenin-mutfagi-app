@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'theme/app_theme.dart';
-import 'features/auth/views/splash_view.dart';
+import 'core/routes/app_pages.dart';
+import 'core/theme/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,8 @@ class MyApp extends StatelessWidget {
       title: 'Mahallenin Mutfağı',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const SplashView(),
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes,
     );
   }
 }

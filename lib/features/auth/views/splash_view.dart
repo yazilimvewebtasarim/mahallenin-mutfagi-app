@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/splash_controller.dart';
-import '../../../theme/app_theme.dart';
+import '../../../core/theme/theme.dart';
 
-class SplashView extends StatelessWidget {
+class SplashView extends GetView<SplashController> {
   const SplashView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the controller
-    Get.put(SplashController());
-
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/routes/app_routes.dart';
 import '../controllers/role_controller.dart';
 
 class RoleView extends StatelessWidget {
@@ -7,7 +8,9 @@ class RoleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(RoleController());
+    final controller = Get.isRegistered<RoleController>()
+        ? Get.find<RoleController>()
+        : Get.put(RoleController());
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +36,7 @@ class RoleView extends StatelessWidget {
               icon: const Icon(Icons.person),
               label: const Text('Müşteri Olarak'),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () => controller.selectRole('chef'),
               icon: const Icon(Icons.soup_kitchen),
@@ -43,6 +46,17 @@ class RoleView extends StatelessWidget {
                 foregroundColor: Theme.of(context).primaryColor,
                 side: BorderSide(color: Theme.of(context).primaryColor),
               ),
+            ),
+            const SizedBox(height: 32),
+            TextButton.icon(
+              onPressed: () => Get.toNamed(AppRoutes.chefMenu),
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text('Aşçı Paneline Doğrudan Git'),
+            ),
+            TextButton.icon(
+              onPressed: () => Get.toNamed(AppRoutes.customerDiscovery),
+              icon: const Icon(Icons.fastfood),
+              label: const Text('Keşfet Paneline Doğrudan Git'),
             ),
           ],
         ),

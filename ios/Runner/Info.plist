@@ -2,12 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Yemeğinizin veya mutfağınızın fotoğrafını çekmek için kamera izni gerekiyor.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Yemeğinizin fotoğrafını seçmek için galeri izni gerekiyor.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Çekilen fotoğrafları kaydetmek için galeri izni gerekiyor.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Sandbox App</string>
+	<string>Mahallenin Mutfağı</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +21,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>sandbox_app</string>
+	<string>Mahallenin Mutfağı</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

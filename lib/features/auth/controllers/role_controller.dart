@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import '../views/login_register_view.dart';
+import '../../../core/routes/app_routes.dart';
 
 class RoleController extends GetxController {
   void selectRole(String role) {
     // role: 'customer' or 'chef'
-    Get.to(() => const LoginRegisterView(), arguments: role);
+    Get.toNamed(AppRoutes.login, arguments: role);
   }
 }
