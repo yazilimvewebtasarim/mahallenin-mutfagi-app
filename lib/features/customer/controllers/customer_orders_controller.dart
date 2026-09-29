@@ -61,6 +61,11 @@ class CustomerOrdersController extends GetxController {
         'Siparişiniz Hazırlanıyor 🍳',
         '#$orderShortId nolu siparişiniz aşçı tarafından özenle hazırlanıyor.',
       );
+    } else if (newStatus == 'on_the_way') {
+      _notificationService.showOrderNotification(
+        'Siparişiniz Yola Çıktı 🛵',
+        '#$orderShortId nolu siparişiniz aşçı tarafından teslimata çıkarıldı. Sıcak sıcak geliyor!',
+      );
     } else if (newStatus == 'completed') {
       _notificationService.showOrderNotification(
         'Siparişiniz Teslim Edildi! 🎉',

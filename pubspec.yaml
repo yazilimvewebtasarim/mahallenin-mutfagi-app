@@ -66,6 +66,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/il_ilce_mahalle.json
+    - assets/sounds/new_order_bell.wav
 
   # To add assets to your application, add an assets section, like this:
   # assets:

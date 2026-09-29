@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'core/routes/app_pages.dart';
 import 'core/theme/theme.dart';
+import 'core/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await NotificationService().init();
+  } catch (e) {
+    debugPrint('NotificationService init error: $e');
+  }
   runApp(const MyApp());
 }
 

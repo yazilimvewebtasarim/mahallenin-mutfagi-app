@@ -177,7 +177,7 @@ class SettingsView extends StatelessWidget {
                 TextField(controller: phoneCtrl, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Cep Telefonu', border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone_outlined))),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: selectedGender,
+                  initialValue: selectedGender,
                   decoration: const InputDecoration(labelText: 'Cinsiyet', border: OutlineInputBorder(), prefixIcon: Icon(Icons.wc_outlined)),
                   items: ['Belirtmek İstemiyorum', 'Kadın', 'Erkek'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                   onChanged: (v) {},
@@ -483,7 +483,7 @@ class _AddressesViewState extends State<AddressesView> {
                 children: [
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: selectedCity,
+                    initialValue: selectedCity,
                     hint: const Text('İl Seçiniz'),
                     decoration: const InputDecoration(labelText: 'İl', border: OutlineInputBorder()),
                     items: _cities.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
@@ -503,7 +503,7 @@ class _AddressesViewState extends State<AddressesView> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: selectedDistrict,
+                    initialValue: selectedDistrict,
                     hint: const Text('İlçe Seçiniz'),
                     decoration: const InputDecoration(labelText: 'İlçe', border: OutlineInputBorder()),
                     items: districts.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
@@ -521,7 +521,7 @@ class _AddressesViewState extends State<AddressesView> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: selectedNeighborhood,
+                    initialValue: selectedNeighborhood,
                     hint: const Text('Mahalle Seçiniz'),
                     decoration: const InputDecoration(labelText: 'Mahalle', border: OutlineInputBorder()),
                     items: neighborhoods.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
