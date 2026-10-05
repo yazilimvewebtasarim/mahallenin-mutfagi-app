@@ -1,4 +1,4 @@
-package com.example.sandbox_app
+package com.mahallenin.mutfagi
 
 import io.flutter.embedding.android.FlutterActivity
 
