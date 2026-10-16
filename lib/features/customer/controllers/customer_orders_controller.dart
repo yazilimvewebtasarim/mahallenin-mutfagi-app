@@ -115,4 +115,19 @@ class CustomerOrdersController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> cancelOrder(String orderId) async {
+    try {
+      final updatedOrder = await _orderService.cancelOrder(orderId);
+      final idx = orders.indexWhere((o) => o.id == orderId);
+      if (idx != -1) {
+        orders[idx] = updatedOrder;
+      }
+      _lastKnownStatuses[orderId] = 'cancelled';
+      Get.snackbar('Başarılı', 'Siparişiniz iptal edildi.', snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Sipariş iptal edilemedi.');
+      Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM);
+    }
+  }
 }

@@ -70,7 +70,9 @@ class ReviewService {
       final response = await _dio.get('${ApiConstants.reviewsEndpoint}/$chefId');
       if (response.data is List) {
         return (response.data as List).map((e) => ReviewModel.fromJson(e)).toList();
-      } else if (response.data['reviews'] is List) {
+      } else if (response.data is Map && response.data['data'] is List) {
+        return (response.data['data'] as List).map((e) => ReviewModel.fromJson(e)).toList();
+      } else if (response.data is Map && response.data['reviews'] is List) {
         return (response.data['reviews'] as List).map((e) => ReviewModel.fromJson(e)).toList();
       }
       return [];

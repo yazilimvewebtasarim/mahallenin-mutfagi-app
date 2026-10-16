@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import '../../../core/routes/app_routes.dart';
+import '../../../core/services/session_service.dart';
 import '../../../data/models/food_model.dart';
 import '../../../data/models/cart_item_model.dart';
 import '../../../data/services/customer_service.dart';
@@ -31,7 +33,11 @@ class CartController extends GetxController {
 
     int totalQuantityOfThisFood = items.where((i) => i.food.id == food.id).fold(0, (sum, i) => sum + i.quantity);
     if (totalQuantityOfThisFood + quantity > food.porsiyonStok) {
-      Get.snackbar('Stok Yetersiz', 'Bu üründen toplam en fazla ${food.porsiyonStok} adet ekleyebilirsiniz.', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+      try {
+        if (Get.context != null) {
+          Get.snackbar('Stok Yetersiz', 'Bu üründen toplam en fazla ${food.porsiyonStok} adet ekleyebilirsiniz.', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+        }
+      } catch (_) {}
       return false;
     }
 
@@ -40,7 +46,7 @@ class CartController extends GetxController {
       items[index] = items[index].copyWith(quantity: items[index].quantity + quantity);
     } else {
       items.add(CartItemModel(
-        id: '${food.id}_${DateTime.now().millisecondsSinceEpoch}',
+        id: '${food.id}_${DateTime.now().microsecondsSinceEpoch}_${items.length}',
         food: food,
         quantity: quantity,
         note: note,
@@ -60,6 +66,7 @@ class CartController extends GetxController {
 
   void _promptKitchenConflict(FoodModel food, {int quantity = 1, String? note, List<ExtraModel> selectedExtras = const []}) {
     try {
+      if (Get.context == null) return;
       Get.defaultDialog(
       title: 'Sepette başka mutfak var',
       middleText: 'Farklı bir mutfaktan ürün eklemek için önce sepeti boşaltmanız gerekir.',
@@ -92,7 +99,11 @@ class CartController extends GetxController {
     if (index >= 0) {
       int totalQuantityOfThisFood = items.where((i) => i.food.id == items[index].food.id).fold(0, (sum, i) => sum + i.quantity);
       if (totalQuantityOfThisFood + 1 > items[index].food.porsiyonStok) {
-        Get.snackbar('Stok Yetersiz', 'Bu üründen toplam en fazla ${items[index].food.porsiyonStok} adet alabilirsiniz.', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+        try {
+          if (Get.context != null) {
+            Get.snackbar('Stok Yetersiz', 'Bu üründen toplam en fazla ${items[index].food.porsiyonStok} adet alabilirsiniz.', backgroundColor: Colors.red, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+          }
+        } catch (_) {}
         return;
       }
       items[index] = items[index].copyWith(quantity: items[index].quantity + 1);
@@ -113,28 +124,28 @@ class CartController extends GetxController {
 
   Future<bool> checkout() async {
     if (items.isEmpty) return false;
-    
-    Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
-    
-    try {
-      final service = Get.find<CustomerService>();
-      await service.syncCart(items: items.toList(), chefId: activeChefId.value);
-      
-      Get.back(); // close loader
-      
+
+    final hasAuth = await SessionService.hasSession();
+    if (!hasAuth) {
       Get.snackbar(
-        'Sipariş Alındı',
-        'Siparişiniz başarıyla tamamlandı.',
-        backgroundColor: Colors.green,
+        'Giriş Yapmalısınız',
+        'Siparişinizi tamamlamak için lütfen giriş yapın.',
+        backgroundColor: const Color(0xFFEA004B),
         colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
       );
-      
-      clearCart();
-      return true;
-    } catch (e) {
-      Get.back(); // close loader
-      Get.snackbar('Hata', 'Sipariş tamamlanamadı: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.toNamed(AppRoutes.login, arguments: 'customer');
       return false;
     }
+
+    try {
+      if (Get.isRegistered<CustomerService>()) {
+        final service = Get.find<CustomerService>();
+        await service.syncCart(items: items.toList(), chefId: activeChefId.value);
+      }
+    } catch (_) {}
+
+    Get.toNamed(AppRoutes.customerCheckout);
+    return true;
   }
 }

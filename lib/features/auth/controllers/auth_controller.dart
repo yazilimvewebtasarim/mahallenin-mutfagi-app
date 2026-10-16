@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/services/api_client.dart';
 import '../../../core/services/session_service.dart';
 import '../../../core/services/upload_service.dart';
 import '../../../core/utils/error_utils.dart';
@@ -209,12 +210,6 @@ class AuthController extends GetxController {
   Future<void> _completeRegistration() async {
     isLoading.value = true;
     try {
-      // Aşçı ise mutfak resmini önce yükle
-      String? kitchenImageUrl;
-      if (selectedRole == 'chef' && kitchenImage.value != null) {
-        kitchenImageUrl = await UploadService.uploadFile(kitchenImage.value!, folder: 'kitchens');
-      }
-
       final response = await dio.post('${ApiConstants.baseUrl}/auth/register', data: {
         'email': emailCtrl.text.trim().toLowerCase(),
         'password': passwordCtrl.text.trim(),
@@ -222,7 +217,6 @@ class AuthController extends GetxController {
         'telefon': phoneCtrl.text.trim(),
         'tc_kimlik': tcCtrl.text.trim(),
         'role': selectedRole,
-        'mutfakResmiUrl': kitchenImageUrl,
         'isVisible': true,
       });
 
@@ -236,6 +230,17 @@ class AuthController extends GetxController {
           userId: data['userId'] ?? '',
           name: nameCtrl.text.trim(),
         );
+      }
+
+      // Aşçı ise token alındıktan sonra mutfak resmini yükle ve profile kaydet
+      if (selectedRole == 'chef' && kitchenImage.value != null) {
+        try {
+          final kitchenImageUrl = await UploadService.uploadFile(kitchenImage.value!, folder: 'kitchens');
+          await ApiClient.dio.patch(
+            '${ApiConstants.authEndpoint}/profile',
+            data: {'mutfakResmiUrl': kitchenImageUrl},
+          );
+        } catch (_) {}
       }
 
       Get.snackbar(

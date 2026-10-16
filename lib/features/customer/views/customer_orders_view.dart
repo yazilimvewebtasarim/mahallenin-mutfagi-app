@@ -153,6 +153,11 @@ class CustomerOrdersView extends GetView<CustomerOrdersController> {
     );
   }
 
+  String _shortOrderId(String? id) {
+    if (id == null || id.isEmpty) return '-';
+    return id.length > 8 ? id.substring(0, 8) : id;
+  }
+
   void _showOrderDetails(BuildContext context, OrderModel order) {
     showModalBottomSheet(
       context: context,
@@ -182,7 +187,7 @@ class CustomerOrdersView extends GetView<CustomerOrdersController> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Sipariş #${order.id?.substring(0, 8) ?? ""}',
+                    'Sipariş #${_shortOrderId(order.id)}',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Container(
@@ -213,8 +218,8 @@ class CustomerOrdersView extends GetView<CustomerOrdersController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${item.quantity}x ${item.food.isim}'),
-                    Text('₺${(item.food.fiyat * item.quantity).toStringAsFixed(2)}'),
+                    Expanded(child: Text('${item.quantity}x ${item.food.isim}')),
+                    Text('₺${item.itemTotal.toStringAsFixed(2)}'),
                   ],
                 ),
               )),
@@ -245,6 +250,42 @@ class CustomerOrdersView extends GetView<CustomerOrdersController> {
                   ),
                 ],
               ),
+              if (order.status == 'pending' && order.id != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      controller.cancelOrder(order.id!);
+                    },
+                    icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                    label: const Text('Siparişi İptal Et', style: TextStyle(color: Colors.red)),
+                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+                  ),
+                ),
+              ],
+              if (order.status == 'completed' && order.id != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Get.toNamed(AppRoutes.orderReview, arguments: {
+                        'orderId': order.id,
+                        'chefId': order.chefId,
+                      });
+                    },
+                    icon: const Icon(Icons.star_rate_rounded),
+                    label: const Text('Siparişi Değerlendir'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEA004B),
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
             ],
           ),
@@ -379,7 +420,7 @@ class CustomerOrdersView extends GetView<CustomerOrdersController> {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   title: Text(
-                    'Sipariş: #${order.id?.substring(0, 8) ?? "-"}',
+                    'Sipariş: #${_shortOrderId(order.id)}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(

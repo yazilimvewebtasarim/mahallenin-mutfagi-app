@@ -2,8 +2,13 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/services/api_client.dart';
 import '../../../core/services/session_service.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/error_utils.dart';
+import '../../customer/controllers/cart_controller.dart';
 import 'about_view.dart';
 
 // ─────────────────────────────────────────────
@@ -99,7 +104,7 @@ class SettingsView extends StatelessWidget {
                   onTap: () => Get.to(() => const FaqView())),
               _Divider(),
               _Tile(icon: Icons.star_rate_outlined, iconColor: Colors.blue, title: 'Uygulamayı Değerlendir',
-                  onTap: () => Get.snackbar('Teşekkürler', 'App Store\'a yönlendiriliyorsunuz...', snackPosition: SnackPosition.BOTTOM)),
+                  onTap: () => Get.snackbar('Teşekkürler', 'Mağazaya yönlendiriliyorsunuz...', snackPosition: SnackPosition.BOTTOM)),
 
               const SizedBox(height: 16),
 
@@ -204,9 +209,34 @@ class SettingsView extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () { 
-                Get.back(); 
-                Get.snackbar('Başarılı', 'Bilgileriniz başarıyla güncellendi.', backgroundColor: Colors.green, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM); 
+              onPressed: () async {
+                final fullName = '${nameCtrl.text.trim()} ${surnameCtrl.text.trim()}'.trim();
+                if (fullName.length < 2) {
+                  Get.snackbar('Hata', 'Lütfen ad ve soyadınızı giriniz.', snackPosition: SnackPosition.BOTTOM);
+                  return;
+                }
+                try {
+                  final payload = <String, dynamic>{'isim_soyad': fullName};
+                  if (phoneCtrl.text.trim().isNotEmpty) {
+                    payload['telefon'] = phoneCtrl.text.trim();
+                  }
+                  await ApiClient.dio.patch('${ApiConstants.authEndpoint}/profile', data: payload);
+                  final session = await SessionService.load();
+                  if (session['token'] != null) {
+                    await SessionService.save(
+                      token: session['token']!,
+                      refreshToken: session['refreshToken'],
+                      role: session['role'] ?? 'customer',
+                      userId: session['userId'] ?? '',
+                      name: fullName,
+                    );
+                  }
+                  Get.back();
+                  Get.snackbar('Başarılı', 'Bilgileriniz başarıyla güncellendi.', backgroundColor: Colors.green, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                } catch (e) {
+                  final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Profil güncellenemedi.');
+                  Get.snackbar('Hata', friendly, backgroundColor: Colors.redAccent, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                }
               },
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEA004B), padding: const EdgeInsets.symmetric(vertical: 16)),
               child: const Text('Değişiklikleri Kaydet', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
@@ -239,10 +269,26 @@ class SettingsView extends StatelessWidget {
             const SizedBox(height: 20),
             SizedBox(width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  if (newCtrl.text != confirmCtrl.text) { Get.snackbar('Hata', 'Şifreler eşleşmiyor.', snackPosition: SnackPosition.BOTTOM); return; }
-                  Get.back();
-                  Get.snackbar('Başarılı', 'Şifreniz değiştirildi.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
+                onPressed: () async {
+                  if (oldCtrl.text.isEmpty || newCtrl.text.length < 6) {
+                    Get.snackbar('Hata', 'Yeni şifreniz en az 6 karakter olmalıdır.', snackPosition: SnackPosition.BOTTOM);
+                    return;
+                  }
+                  if (newCtrl.text != confirmCtrl.text) {
+                    Get.snackbar('Hata', 'Şifreler eşleşmiyor.', snackPosition: SnackPosition.BOTTOM);
+                    return;
+                  }
+                  try {
+                    await ApiClient.dio.post('${ApiConstants.authEndpoint}/change-password', data: {
+                      'currentPassword': oldCtrl.text,
+                      'newPassword': newCtrl.text,
+                    });
+                    Get.back();
+                    Get.snackbar('Başarılı', 'Şifreniz değiştirildi.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
+                  } catch (e) {
+                    final friendly = ErrorUtils.toUserFriendlyMessage(e, fallback: 'Şifre güncellenemedi.');
+                    Get.snackbar('Hata', friendly, snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
+                  }
                 },
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: const Text('Şifreyi Güncelle'),
@@ -289,7 +335,14 @@ class SettingsView extends StatelessWidget {
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Vazgeç')),
         ElevatedButton(
-          onPressed: () async { Navigator.pop(ctx); await SessionService.clear(); Get.offAllNamed(AppRoutes.roleSelect); },
+          onPressed: () async {
+            Navigator.pop(ctx);
+            if (Get.isRegistered<CartController>()) {
+              Get.find<CartController>().clearCart();
+            }
+            await SessionService.clear();
+            Get.offAllNamed(AppRoutes.roleSelect);
+          },
           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEA004B)),
           child: const Text('Çıkış Yap', style: TextStyle(color: Colors.white)),
         ),
@@ -304,7 +357,18 @@ class SettingsView extends StatelessWidget {
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Vazgeç')),
         ElevatedButton(
-          onPressed: () { Navigator.pop(ctx); Get.snackbar('Bilgi', 'Hesap silme talebiniz alındı. Destek ekibimiz sizinle iletişime geçecektir.', snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 5)); },
+          onPressed: () async {
+            Navigator.pop(ctx);
+            try {
+              await ApiClient.dio.delete('${ApiConstants.authEndpoint}/account');
+            } catch (_) {}
+            if (Get.isRegistered<CartController>()) {
+              Get.find<CartController>().clearCart();
+            }
+            await SessionService.clear();
+            Get.offAllNamed(AppRoutes.roleSelect);
+            Get.snackbar('Bilgi', 'Hesabınız kalıcı olarak silindi.', snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 4));
+          },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           child: const Text('Hesabımı Sil', style: TextStyle(color: Colors.white)),
         ),
@@ -442,7 +506,35 @@ class FavoritesView extends StatefulWidget {
 }
 
 class _FavoritesViewState extends State<FavoritesView> {
-  final List<Map<String, String>> _favorites = []; // SharedPreferences'tan dolacak
+  final List<Map<String, String>> _favorites = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('saved_favorites');
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List;
+        setState(() {
+          _favorites
+            ..clear()
+            ..addAll(decoded.map((e) => Map<String, String>.from(e as Map)));
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_favorites', jsonEncode(_favorites));
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -459,9 +551,15 @@ class _FavoritesViewState extends State<FavoritesView> {
           : ListView.builder(
               itemCount: _favorites.length,
               itemBuilder: (ctx, i) => ListTile(
-                leading: CircleAvatar(child: Text(_favorites[i]['name']![0])),
-                title: Text(_favorites[i]['name']!),
-                trailing: IconButton(icon: const Icon(Icons.favorite, color: Colors.red), onPressed: () => setState(() => _favorites.removeAt(i))),
+                leading: CircleAvatar(child: Text((_favorites[i]['name'] ?? 'A')[0])),
+                title: Text(_favorites[i]['name'] ?? ''),
+                trailing: IconButton(
+                  icon: const Icon(Icons.favorite, color: Colors.red),
+                  onPressed: () {
+                    setState(() => _favorites.removeAt(i));
+                    _saveFavorites();
+                  },
+                ),
               ),
             ),
     );
@@ -490,14 +588,34 @@ class _AddressesViewState extends State<AddressesView> {
 
   Future<void> _loadData() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedStr = prefs.getString('saved_addresses');
+      if (savedStr != null && savedStr.isNotEmpty) {
+        final decoded = jsonDecode(savedStr) as List;
+        _addresses
+          ..clear()
+          ..addAll(decoded.map((e) => Map<String, String>.from(e as Map)));
+      }
+    } catch (_) {}
+
+    try {
       final jsonStr = await rootBundle.loadString('assets/data/il_ilce_mahalle.json');
       _addressData = jsonDecode(jsonStr);
-      setState(() {
-        _cities = _addressData.keys.toList()..sort();
-      });
+      if (mounted) {
+        setState(() {
+          _cities = _addressData.keys.toList()..sort();
+        });
+      }
     } catch (e) {
       debugPrint("Adres JSON okunamadı: $e");
     }
+  }
+
+  Future<void> _persistAddresses() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_addresses', jsonEncode(_addresses));
+    } catch (_) {}
   }
 
   @override
@@ -529,11 +647,14 @@ class _AddressesViewState extends State<AddressesView> {
                     decoration: BoxDecoration(color: const Color(0xFFEA004B).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                     child: const Icon(Icons.location_on, color: Color(0xFFEA004B)),
                   ),
-                  title: Text(addr['title']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(addr['address']!),
+                  title: Text(addr['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(addr['address'] ?? ''),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => setState(() => _addresses.removeAt(i)),
+                    onPressed: () {
+                      setState(() => _addresses.removeAt(i));
+                      _persistAddresses();
+                    },
                   ),
                 );
               }),
@@ -655,9 +776,10 @@ class _AddressesViewState extends State<AddressesView> {
                     return;
                   }
                   setState(() => _addresses.add({
-                    'title': titleCtrl.text, 
-                    'address': '\$selectedNeighborhood \$selectedDistrict / \$selectedCity\\n\${streetCtrl.text} No:\${buildingNoCtrl.text} D:\${doorNoCtrl.text}'
+                    'title': titleCtrl.text.trim(), 
+                    'address': '$selectedNeighborhood $selectedDistrict / $selectedCity\n${streetCtrl.text.trim()} No:${buildingNoCtrl.text.trim()} D:${doorNoCtrl.text.trim()}'
                   }));
+                  _persistAddresses();
                   Get.back();
                   Get.snackbar('Başarılı', 'Adres başarıyla eklendi.', backgroundColor: Colors.green, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
                 },

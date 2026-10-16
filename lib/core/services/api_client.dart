@@ -79,13 +79,14 @@ class ApiClient {
             }
 
             // If refresh not possible or failed:
+            final previousRole = SessionService.currentRole ?? 'customer';
             final hadToken = await SessionService.hasSession();
             if (hadToken) {
               await SessionService.clear();
             }
 
             // Prompt user with a polite dialog if not already open
-            _showAuthRequiredDialog(isExpired: hadToken);
+            _showAuthRequiredDialog(isExpired: hadToken, role: previousRole);
 
             // Pass a sanitized, friendly exception to prevent stack trace/Mozilla text
             return handler.reject(
@@ -126,7 +127,7 @@ class ApiClient {
     return _instance!;
   }
 
-  static void _showAuthRequiredDialog({bool isExpired = false}) {
+  static void _showAuthRequiredDialog({bool isExpired = false, String role = 'customer'}) {
     if (_isShowingAuthDialog) return;
     _isShowingAuthDialog = true;
 
@@ -144,12 +145,14 @@ class ApiClient {
         onConfirm: () {
           _isShowingAuthDialog = false;
           Get.back();
-          Get.toNamed(AppRoutes.login, arguments: 'customer');
+          Get.toNamed(AppRoutes.login, arguments: role);
         },
         onCancel: () {
           _isShowingAuthDialog = false;
         },
-      );
+      ).whenComplete(() {
+        _isShowingAuthDialog = false;
+      });
     });
   }
 }

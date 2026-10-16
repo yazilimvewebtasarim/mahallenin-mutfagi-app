@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../data/models/food_model.dart';
 import '../../../data/services/chef_service.dart';
+import '../../../core/services/session_service.dart';
 import '../../../core/services/upload_service.dart';
 
 class ChefController extends GetxController {
@@ -87,6 +88,7 @@ class ChefController extends GetxController {
     stockController.dispose();
     allergenController.dispose();
     imageUrlController.dispose();
+    extrasController.dispose();
     super.onClose();
   }
 
@@ -137,7 +139,7 @@ class ChefController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final result = await chefService.getFoods();
+      final result = await chefService.getFoods(chefId: SessionService.currentUserId);
       foods.assignAll(result);
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');
@@ -266,6 +268,7 @@ class ChefController extends GetxController {
       );
       return false;
     } finally {
+      isUploadingImage.value = false;
       isSubmitting.value = false;
     }
   }

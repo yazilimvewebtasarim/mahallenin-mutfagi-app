@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../data/models/order_model.dart';
 import '../../../data/services/order_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/session_service.dart';
 import '../../../core/utils/error_utils.dart';
 
 class ChefOrdersController extends GetxController {
@@ -36,6 +37,9 @@ class ChefOrdersController extends GetxController {
 
   Future<void> _pollOrdersSilently() async {
     try {
+      final hasAuth = await SessionService.hasSession();
+      if (!hasAuth) return;
+
       final freshOrders = await _orderService.getChefOrders();
       bool hasNewOrder = false;
 

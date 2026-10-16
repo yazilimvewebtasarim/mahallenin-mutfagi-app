@@ -47,12 +47,37 @@ class CartItemModel {
   }
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
+    final rawExtras = (json['selectedExtras'] as List<dynamic>?)
+            ?.whereType<Map>()
+            .map((e) => ExtraModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList() ??
+        [];
+
+    FoodModel parsedFood;
+    if (json['food'] is Map) {
+      parsedFood = FoodModel.fromJson(Map<String, dynamic>.from(json['food'] as Map));
+    } else {
+      final double extrasSum = rawExtras.fold(0.0, (sum, ex) => sum + ex.fiyat);
+      final double unitPrice = (json['price'] ?? json['fiyat'] ?? 0).toDouble();
+      final double baseFoodPrice = (unitPrice - extrasSum) > 0 ? (unitPrice - extrasSum) : unitPrice;
+      parsedFood = FoodModel(
+        id: (json['foodId'] ?? json['id'] ?? '').toString(),
+        chefId: json['chefId']?.toString(),
+        isim: (json['isim'] ?? json['name'] ?? 'Ev Yemeği').toString(),
+        aciklama: (json['aciklama'] ?? '').toString(),
+        fiyat: baseFoodPrice,
+        porsiyonStok: (json['porsiyon_stok'] as num?)?.toInt() ?? 1,
+        alerjenDurumu: (json['alerjen_durumu'] ?? '').toString(),
+        resimUrl: (json['resim_url'] ?? '').toString(),
+      );
+    }
+
     return CartItemModel(
-      id: json['id'] as String? ?? '',
-      food: FoodModel.fromJson(json['food'] as Map<String, dynamic>),
+      id: (json['id'] ?? json['foodId'] ?? '').toString(),
+      food: parsedFood,
       quantity: (json['quantity'] as num?)?.toInt() ?? 1,
       note: json['note'] as String?,
-      selectedExtras: (json['selectedExtras'] as List<dynamic>?)?.map((e) => ExtraModel.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+      selectedExtras: rawExtras,
     );
   }
 }

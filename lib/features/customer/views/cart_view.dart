@@ -146,6 +146,8 @@ class CartView extends StatelessWidget {
                       controller.deliveryFee,
                       freeText: controller.deliveryFee == 0 ? 'Ücretsiz' : null,
                     ),
+                    const SizedBox(height: 8),
+                    _buildPriceRow('Hizmet Bedeli', controller.serviceFee),
                     const Divider(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -10,6 +10,7 @@ abstract class AppRoutes {
   static const customerOrders = '/customer/orders';
   static const chefOrders = '/chef/orders';
   static const customerReview = '/customer/review';
+  static const orderReview = '/customer/review';
   static const chefReviews = '/chef/reviews';
   static const stories = '/stories';
   static const chat = '/chat';

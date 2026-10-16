@@ -49,14 +49,9 @@ class RoleView extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             TextButton.icon(
-              onPressed: () => Get.toNamed(AppRoutes.chefMenu),
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Aşçı Paneline Doğrudan Git'),
-            ),
-            TextButton.icon(
               onPressed: () => Get.toNamed(AppRoutes.customerDiscovery),
               icon: const Icon(Icons.fastfood),
-              label: const Text('Keşfet Paneline Doğrudan Git'),
+              label: const Text('Misafir Olarak Vitrinleri Keşfet'),
             ),
           ],
         ),

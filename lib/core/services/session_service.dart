@@ -8,6 +8,8 @@ class SessionService {
   static const _keyName = 'auth_user_name';
 
   static String? currentUserId;
+  static String? currentRole;
+  static String? currentUserName;
 
   static Future<void> save({
     required String token,
@@ -17,6 +19,8 @@ class SessionService {
     String? name,
   }) async {
     currentUserId = userId;
+    currentRole = role;
+    if (name != null) currentUserName = name;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyToken, token);
     if (refreshToken != null) {
@@ -41,13 +45,17 @@ class SessionService {
   static Future<Map<String, String?>> load() async {
     final prefs = await SharedPreferences.getInstance();
     final uid = prefs.getString(_keyUserId);
+    final role = prefs.getString(_keyRole);
+    final name = prefs.getString(_keyName);
     currentUserId = uid;
+    currentRole = role;
+    currentUserName = name;
     return {
       'token': prefs.getString(_keyToken),
       'refreshToken': prefs.getString(_keyRefreshToken),
-      'role': prefs.getString(_keyRole),
+      'role': role,
       'userId': uid,
-      'name': prefs.getString(_keyName),
+      'name': name,
     };
   }
 
@@ -63,6 +71,8 @@ class SessionService {
 
   static Future<void> clear() async {
     currentUserId = null;
+    currentRole = null;
+    currentUserName = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyToken);
     await prefs.remove(_keyRefreshToken);

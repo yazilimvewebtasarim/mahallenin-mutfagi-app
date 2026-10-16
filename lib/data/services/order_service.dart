@@ -15,7 +15,10 @@ class OrderService {
         data: orderData,
       );
       if (response.statusCode == 201 || response.statusCode == 200) {
-        return OrderModel.fromJson(response.data['order'] ?? response.data);
+        final payload = response.data is Map
+            ? (response.data['data'] ?? response.data['order'] ?? response.data)
+            : response.data;
+        return OrderModel.fromJson(Map<String, dynamic>.from(payload as Map));
       }
       throw Exception('Failed to create order');
     } catch (e) {
@@ -55,16 +58,30 @@ class OrderService {
     }
   }
 
-
   Future<OrderModel> updateOrderStatus(String orderId, String status) async {
     try {
       final response = await _dio.put(
         '${ApiConstants.chefOrdersEndpoint}/$orderId/status',
         data: {'status': status},
       );
-      return OrderModel.fromJson(response.data['order'] ?? response.data);
+      final payload = response.data is Map
+          ? (response.data['data'] ?? response.data['order'] ?? response.data)
+          : response.data;
+      return OrderModel.fromJson(Map<String, dynamic>.from(payload as Map));
     } catch (e) {
       throw Exception('Failed to update order status: $e');
+    }
+  }
+
+  Future<OrderModel> cancelOrder(String orderId) async {
+    try {
+      final response = await _dio.put('${ApiConstants.ordersEndpoint}/$orderId/cancel');
+      final payload = response.data is Map
+          ? (response.data['data'] ?? response.data['order'] ?? response.data)
+          : response.data;
+      return OrderModel.fromJson(Map<String, dynamic>.from(payload as Map));
+    } catch (e) {
+      throw Exception('Sipariş iptal edilemedi: $e');
     }
   }
 }

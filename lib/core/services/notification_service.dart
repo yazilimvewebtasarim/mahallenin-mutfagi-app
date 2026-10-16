@@ -19,6 +19,11 @@ class NotificationService {
     const InitializationSettings initSettings = InitializationSettings(android: androidSettings, iOS: iosSettings);
 
     await _notificationsPlugin.initialize(settings: initSettings);
+    try {
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+    } catch (_) {}
   }
 
   Future<void> showOrderNotification(String title, String body) async {

@@ -19,11 +19,14 @@ class PaymentService {
     }
   }
 
-  Future<String> initCheckoutForm(String orderId) async {
+  Future<String> initCheckoutForm(String orderId, {double? amount}) async {
     try {
       final response = await _dio.post(
         '${ApiConstants.paymentEndpoint}/checkout-form/init',
-        data: {'orderId': orderId},
+        data: {
+          'orderId': orderId,
+          'amount': amount ?? 100.0,
+        },
       );
       // Returns a payment HTML or url
       return response.data['paymentPageUrl'] ?? response.data['htmlContent'] ?? '';

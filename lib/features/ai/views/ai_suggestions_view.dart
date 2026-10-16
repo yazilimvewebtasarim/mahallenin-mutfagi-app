@@ -45,7 +45,7 @@ class AiSuggestionsView extends StatelessWidget {
           itemBuilder: (context, index) {
             final suggestion = controller.suggestions[index];
             return ListTile(
-              title: Text(suggestion['name'] ?? 'Suggestion'),
+              title: Text(suggestion['name'] ?? suggestion['menu'] ?? 'Öneri'),
               subtitle: Text(suggestion['description'] ?? ''),
               trailing: const Icon(Icons.auto_awesome),
             );
